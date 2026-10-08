@@ -15,11 +15,14 @@ local multipliers = {
 }
 
 function computeFOV(px, py, radius)
-    GLOBAL_MAP:clearVisibility()
-    GLOBAL_MAP:setVisible(px, py)
+    local lightX = px * 2
+    local lightY = py * 2
+
+    GLOBAL_MAP:clearMapLighting()
+    GLOBAL_MAP:addLight(lightX, lightY, 3)
 
     for i = 1, 8 do
-        castLight(px, py, 1, 1.0, 0.0, radius,
+        castLight(lightX, lightY, 1, 1.0, 0.0, radius,
             multipliers[i][1], multipliers[i][2],
             multipliers[i][3], multipliers[i][4]
         )
@@ -52,21 +55,21 @@ function castLight(cx, cy, row, startSlope, endSlope, radius, xx, xy, yx, yy)
                 break
             end
 
-            if X >= 1 and X <= MAP_WIDTH and Y >= 1 and Y <= MAP_HEIGHT then
+            if X >= 1 and X <= LIGHTING_WIDTH and Y >= 1 and Y <= LIGHTING_HEIGHT then
                 local distSq = dx * dx + dy * dy
                 if distSq <= radiusSq then
-                    GLOBAL_MAP:setVisible(X, Y)
+                    GLOBAL_MAP:addLight(X, Y, 1)
                 end
 
                 if blocked then
-                    if GLOBAL_MAP:isOpaque(X, Y) then
+                    if GLOBAL_MAP:isLightCellOpaque(X, Y) then
                         newStart = rSlope
                     else
                         blocked = false
                         startSlope = newStart
                     end
                 else
-                    if GLOBAL_MAP:isOpaque(X, Y) and i < radius then
+                    if GLOBAL_MAP:isLightCellOpaque(X, Y) and i < radius then
                         blocked = true
                         castLight(cx, cy, i + 1, startSlope, lSlope,
                             radius, xx, xy, yx, yy)

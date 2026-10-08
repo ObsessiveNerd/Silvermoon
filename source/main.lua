@@ -45,6 +45,7 @@ currentContext:setup()
 function playdate.update()
     currentContext:update()
     gfx.sprite.update()
+    GLOBAL_MAP:update()
     pd.timer.updateTimers()
 end
 

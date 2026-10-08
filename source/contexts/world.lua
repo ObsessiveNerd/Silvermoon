@@ -11,8 +11,6 @@ import "enemies/enemy_factory"
 
 class('World').extends()
 
-
-
 function World:init()
     GLOBAL_MAP = Map()
 end

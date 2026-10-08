@@ -18,6 +18,7 @@ class("Map").extends()
 function Map:init()
     self.map = {}
     self.visibleTiles = {}
+    self.light = {}
     self.entities = {}
     self.collisionSprites = {}
     self.width, self.height = 0, 0
@@ -45,6 +46,10 @@ function Map:createMap(levelIdentifier)
     self.mapLoaded = true
 end
 
+function Map:update()
+    self:updateLighting()
+end
+
 function Map:loadLDtk(levelIdentifier)
     self.world = LDtkWorld(LDtkConfig.projectPath)
     self.world:load()
@@ -70,6 +75,7 @@ function Map:buildTiles()
     local w, h = source:getSize()
     self.width, self.height = w, h
     MAP_WIDTH, MAP_HEIGHT = w, h
+    LIGHTING_WIDTH, LIGHTING_HEIGHT = w * 2, h * 2
 
     for x = 1, w do
         self.map[x] = {}
@@ -80,6 +86,13 @@ function Map:buildTiles()
             tile:setZIndex(10)
             self.map[x][y] = tile
             tile:add()
+        end
+    end
+
+    for x = 1, LIGHTING_WIDTH do
+        self.light[x] = {}
+        for y = 1, LIGHTING_HEIGHT do
+            self.light[x][y] = 0
         end
     end
 end
@@ -140,6 +153,12 @@ function Map:isBlocked(x, y)
     return value == LDtkConfig.collision.Solid or value == LDtkConfig.collision.MovementBlocker
 end
 
+function Map:isLightCellOpaque(lightX, lightY)
+    local tileX = math.floor((lightX - 1) / 2) + 1
+    local tileY = math.floor((lightY - 1) / 2) + 1
+    return self:isOpaque(tileX, tileY)
+end
+
 function Map:isOpaque(x, y)
     local value = self:getCollisionValue(x, y)
     return value == LDtkConfig.collision.Solid or value == LDtkConfig.collision.VisionBlocker
@@ -162,6 +181,35 @@ function Map:setCollisionValue(x, y, value)
         computeFOV(px, py, player.viewRadius)
     end
     return true
+end
+
+function Map:clearMapLighting()
+    for x = 1, LIGHTING_WIDTH do
+        for y = 1, LIGHTING_HEIGHT do
+            self.light[x][y] = 0
+        end
+    end
+end
+
+function Map:updateLighting()
+    local LIGHT_CELL_SIZE = TILE_SIZE / 2 -- 4 source pixels
+    local LIGHT_CELL_WORLD_SIZE = LIGHT_CELL_SIZE * ZOOM
+
+    for x = 1, LIGHTING_WIDTH do
+        for y = 1, LIGHTING_HEIGHT do
+            local drawX = (x - 1) * LIGHT_CELL_WORLD_SIZE
+            local drawY = (y - 1) * LIGHT_CELL_WORLD_SIZE
+            local lightingValue = self.light[x][y]
+            if lightingValue == 0 then
+                gfx.setColor(gfx.kColorBlack)
+                gfx.fillRect(drawX, drawY, LIGHT_CELL_WORLD_SIZE, LIGHT_CELL_WORLD_SIZE)
+            elseif lightingValue == 1 then
+            elseif lightingValue == 2 then
+            else
+            -- full light, no overlay
+            end
+        end
+    end
 end
 
 function Map:worldToTile(px, py)
@@ -240,12 +288,17 @@ function Map:getEntityImage(entity)
     return self.tileTable:getImage(1)
 end
 
-function Map:setVisible(x, y)
-    local tile = self:getTile(x, y)
-    if not tile then return end
-    tile:setVisible(true)
-    table.insert(self.visibleTiles, tile)
+function Map:addLight(lightX, lightY, brightness)
+    if not (self.light[lightX] and self.light[lightX][lightY]) then return end
+    self.light[lightX][lightY] = math.min(3, self.light[lightX][lightY] + brightness)
 end
+
+-- function Map:setVisible(x, y)
+--     local tile = self:getTile(x, y)
+--     if not tile then return end
+--     tile:setVisible(true)
+--     table.insert(self.visibleTiles, tile)
+-- end
 
 function Map:clearVisibility()
     for _, tile in ipairs(self.visibleTiles) do tile:setVisible(false) end

@@ -19,7 +19,7 @@ function Player:init(revolver)
     }
     self.revolver = Revolver()
     playerImage = gfx.image.new("sprites/proto1")
-    self.viewRadius = 4
+    self.viewRadius = 8
     self.speed = 3
     self.maxHealth = 100
     self.health = 100

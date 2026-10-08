@@ -21,14 +21,14 @@ function Tile:init(x, y, image, solid)
     self.tileImage = image
     self.solid = solid
 
-    self.visible = false
+    self.visible = true
     self.blockSight = false
     self.seen = false
     -- self:setSize(TILE_SIZE, TILE_SIZE)
     self:setScale(ZOOM)
     self:setCenter(0, 0)
     self:moveTo(x, y)
-    self:setImage(BLACK_TILE)
+    self:setImage(image)
     if solid then
         self:setCollideRect(0, 0, TILE_SIZE * ZOOM, TILE_SIZE * ZOOM)
     end
