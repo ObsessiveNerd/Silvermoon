@@ -10,8 +10,17 @@ import "ldtk_world"
 import "entity_registry"
 import "enemies/enemy_world"
 import "entities/door_world"
+import "entities/npc"
 
 local TILE_SIZE <const> = LDtkConfig.tileSize
+local BAYER_4X4 = {
+    { 0,  8,  2, 10 },
+    {12,  4, 14,  6 },
+    { 3, 11,  1,  9 },
+    {15,  7, 13,  5 },
+}
+
+local timer = nil
 
 class("Map").extends()
 
@@ -25,6 +34,7 @@ function Map:init()
     self.tileTable = nil
     self.mapLoaded = false
     self.levelIdentifier = nil
+    self.interactableMap = {}
     self.registry = EntityRegistry()
     self:registerEntityFactories()
 end
@@ -55,7 +65,7 @@ function Map:loadLDtk(levelIdentifier)
     self.world:load()
     self.level = self.world:getLevel(levelIdentifier)
     LDtk.load(LDtkConfig.projectPath)
-    self.tileTable = gfx.imagetable.new("sprites/test-table-8-8")
+    self.tileTable = gfx.imagetable.new("spritemap/invert-test-map-table-8-8")
 
     self.layers = {}
     for _, layerName in ipairs(LDtkConfig.visualLayers) do
@@ -200,16 +210,39 @@ function Map:updateLighting()
             local drawX = (x - 1) * LIGHT_CELL_WORLD_SIZE
             local drawY = (y - 1) * LIGHT_CELL_WORLD_SIZE
             local lightingValue = self.light[x][y]
-            if lightingValue == 0 then
-                gfx.setColor(gfx.kColorBlack)
-                gfx.fillRect(drawX, drawY, LIGHT_CELL_WORLD_SIZE, LIGHT_CELL_WORLD_SIZE)
-            elseif lightingValue == 1 then
-            elseif lightingValue == 2 then
-            else
-            -- full light, no overlay
+           
+            self:drawDitheredDarkness(drawX, drawY, LIGHT_CELL_WORLD_SIZE, 3 - lightingValue)
+        end
+    end
+end
+
+function Map:drawDitheredDarkness(x, y, size, darkness)
+    if darkness == 0 then return end
+
+    gfx.setColor(gfx.kColorBlack)
+
+    if darkness == 3 then
+        gfx.fillRect(x, y, size, size)
+        return
+    end
+
+    -- draw the specific dither pattern for the darkness level
+    local threshold = 12 + self:getTwinkleOffset(x, y)
+
+    for pixelY = 0, size - 1 do
+        for pixelX = 0, size - 1 do
+            local bayerX = (pixelX % 4) + 1
+            local bayerY = (pixelY % 4) + 1
+            if BAYER_4X4[bayerY][bayerX] < threshold then
+                gfx.fillRect(x + pixelX, y + pixelY, 1, 1)
             end
         end
     end
+end
+
+function Map:getTwinkleOffset(x, y)
+    local time = pd.getCurrentTimeMilliseconds() / 1000
+    return ((math.sin(time + x + y) * 3)) % 3
 end
 
 function Map:worldToTile(px, py)
@@ -245,7 +278,10 @@ function Map:registerEntityFactories()
         return map:createEntitySprite(entity, TAGS.Key, true)
     end)
     self.registry:register("NPC", function(map, entity)
-        return map:createEntitySprite(entity, nil, false)
+        local sprite = map:getEntityImage(entity)
+        local npc = NPC(entity, sprite)
+        map.interactableMap[entity.gridX .. ":" .. entity.gridY] = npc
+        return npc
     end)
     self.registry:register("Interactable", function(map, entity)
         local sprite = map:createEntitySprite(entity, nil, entity.fields.blocksMovement == true)
@@ -273,6 +309,14 @@ function Map:createEntitySprite(entity, tag, blocksMovement)
     if blocksMovement then sprite:setCollideRect(0, 0, entity.width * ZOOM, entity.height * ZOOM) end
     sprite:add()
     return sprite
+end
+
+function Map:getEntityAtTile(x, y)
+    if self.interactableMap[x .. ":" .. y] then
+        return self.interactableMap[x .. ":" .. y]
+    end
+    print("No interactable entity found at tile (" .. x .. ", " .. y .. ")")
+    return nil
 end
 
 function Map:getEntityImage(entity)

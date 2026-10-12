@@ -11,6 +11,8 @@ import "enemies/enemy_factory"
 
 class('World').extends()
 
+currentUI = nil
+
 function World:init()
     GLOBAL_MAP = Map()
 end
@@ -21,10 +23,13 @@ function World:setup()
 end
 
 function World:update()
-    player:update()
-    if(pd.buttonJustPressed(pd.kButtonB)) then
-        setContext('Reload')
-        return
+    gfx.sprite.update()
+    
+    if currentUI ~= nil then
+        currentUI:update()
+    else
+        player:update()
+        GLOBAL_MAP:update()
     end
 end
 

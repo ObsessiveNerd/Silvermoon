@@ -58,7 +58,13 @@ function castLight(cx, cy, row, startSlope, endSlope, radius, xx, xy, yx, yy)
             if X >= 1 and X <= LIGHTING_WIDTH and Y >= 1 and Y <= LIGHTING_HEIGHT then
                 local distSq = dx * dx + dy * dy
                 if distSq <= radiusSq then
-                    GLOBAL_MAP:addLight(X, Y, 1)
+                    local lightingToAdd = 1
+                    if distSq <= radiusSq / 6 then
+                        lightingToAdd = 3
+                    elseif distSq <= (radiusSq * 4) / 6 then
+                        lightingToAdd = 3
+                    end
+                    GLOBAL_MAP:addLight(X, Y, lightingToAdd)
                 end
 
                 if blocked then

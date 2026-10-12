@@ -18,7 +18,7 @@ function Player:init(revolver)
         key = 0
     }
     self.revolver = Revolver()
-    playerImage = gfx.image.new("sprites/proto1")
+    playerImage = gfx.image.new("sprites/proto2")
     self.viewRadius = 8
     self.speed = 3
     self.maxHealth = 100
@@ -113,10 +113,32 @@ function Player:update()
         self:updateCamera(actualX, actualY)
     end
 
-    if pd.buttonJustPressed(pd.kButtonA) then --do something
+    if pd.buttonJustPressed(pd.kButtonA) then
+        self:interactWithEnvironment()
         
     elseif pd.buttonJustPressed(pd.kButtonB) then --open inventory/reload
         setContext("Reload")
+    end
+end
+
+function Player:interactWithEnvironment()
+    local x, y = self.playerSprite:getPosition()
+    local tileX, tileY = GLOBAL_MAP:getTilePosition(x, y)
+    local interactX, interactY = tileX, tileY
+
+    if currentDirection == 'Up' then
+        interactY -= 1
+    elseif currentDirection == 'Down' then
+        interactY += 1
+    elseif currentDirection == 'Left' then
+        interactX -= 1
+    elseif currentDirection == 'Right' then
+        interactX += 1
+    end
+
+    local entity = GLOBAL_MAP:getEntityAtTile(interactX, interactY)
+    if entity then
+        entity:interact()
     end
 end
 
