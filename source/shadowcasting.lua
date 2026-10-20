@@ -2,6 +2,7 @@ local pd <const> = playdate
 local gfx <const> = playdate.graphics
 
 import "map"
+import "fog_of_war"
 
 local multipliers = {
     {1, 0, 0, 1},   -- octant 0

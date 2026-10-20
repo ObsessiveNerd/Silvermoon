@@ -29,7 +29,6 @@ function World:update()
         currentUI:update()
     else
         player:update()
-        GLOBAL_MAP:update()
     end
 end
 

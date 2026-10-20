@@ -11,15 +11,9 @@ import "entity_registry"
 import "enemies/enemy_world"
 import "entities/door_world"
 import "entities/npc"
+import "fog_of_war"
 
 local TILE_SIZE <const> = LDtkConfig.tileSize
-local BAYER_4X4 = {
-    { 0,  8,  2, 10 },
-    {12,  4, 14,  6 },
-    { 3, 11,  1,  9 },
-    {15,  7, 13,  5 },
-}
-
 local timer = nil
 
 class("Map").extends()
@@ -27,7 +21,6 @@ class("Map").extends()
 function Map:init()
     self.map = {}
     self.visibleTiles = {}
-    self.light = {}
     self.entities = {}
     self.collisionSprites = {}
     self.width, self.height = 0, 0
@@ -54,10 +47,19 @@ function Map:createMap(levelIdentifier)
     self:buildCollision()
     self:createEntities()
     self.mapLoaded = true
+    self.fogOfWar = FogOfWar(self)
 end
 
-function Map:update()
-    self:updateLighting()
+function Map:clearMapLighting()
+    if self.fogOfWar then
+        self.fogOfWar:clearMapLighting()
+    end
+end
+
+function Map:addLight(lightX, lightY, brightness)
+    if self.fogOfWar then
+        self.fogOfWar:addLight(lightX, lightY, brightness)
+    end
 end
 
 function Map:loadLDtk(levelIdentifier)
@@ -96,13 +98,6 @@ function Map:buildTiles()
             tile:setZIndex(10)
             self.map[x][y] = tile
             tile:add()
-        end
-    end
-
-    for x = 1, LIGHTING_WIDTH do
-        self.light[x] = {}
-        for y = 1, LIGHTING_HEIGHT do
-            self.light[x][y] = 0
         end
     end
 end
@@ -193,58 +188,6 @@ function Map:setCollisionValue(x, y, value)
     return true
 end
 
-function Map:clearMapLighting()
-    for x = 1, LIGHTING_WIDTH do
-        for y = 1, LIGHTING_HEIGHT do
-            self.light[x][y] = 0
-        end
-    end
-end
-
-function Map:updateLighting()
-    local LIGHT_CELL_SIZE = TILE_SIZE / 2 -- 4 source pixels
-    local LIGHT_CELL_WORLD_SIZE = LIGHT_CELL_SIZE * ZOOM
-
-    for x = 1, LIGHTING_WIDTH do
-        for y = 1, LIGHTING_HEIGHT do
-            local drawX = (x - 1) * LIGHT_CELL_WORLD_SIZE
-            local drawY = (y - 1) * LIGHT_CELL_WORLD_SIZE
-            local lightingValue = self.light[x][y]
-           
-            self:drawDitheredDarkness(drawX, drawY, LIGHT_CELL_WORLD_SIZE, 3 - lightingValue)
-        end
-    end
-end
-
-function Map:drawDitheredDarkness(x, y, size, darkness)
-    if darkness == 0 then return end
-
-    gfx.setColor(gfx.kColorBlack)
-
-    if darkness == 3 then
-        gfx.fillRect(x, y, size, size)
-        return
-    end
-
-    -- draw the specific dither pattern for the darkness level
-    local threshold = 12 + self:getTwinkleOffset(x, y)
-
-    for pixelY = 0, size - 1 do
-        for pixelX = 0, size - 1 do
-            local bayerX = (pixelX % 4) + 1
-            local bayerY = (pixelY % 4) + 1
-            if BAYER_4X4[bayerY][bayerX] < threshold then
-                gfx.fillRect(x + pixelX, y + pixelY, 1, 1)
-            end
-        end
-    end
-end
-
-function Map:getTwinkleOffset(x, y)
-    local time = pd.getCurrentTimeMilliseconds() / 1000
-    return ((math.sin(time + x + y) * 3)) % 3
-end
-
 function Map:worldToTile(px, py)
     return math.floor(px / (TILE_SIZE * ZOOM)) + 1, math.floor(py / (TILE_SIZE * ZOOM)) + 1
 end
@@ -331,18 +274,6 @@ function Map:getEntityImage(entity)
     end
     return self.tileTable:getImage(1)
 end
-
-function Map:addLight(lightX, lightY, brightness)
-    if not (self.light[lightX] and self.light[lightX][lightY]) then return end
-    self.light[lightX][lightY] = math.min(3, self.light[lightX][lightY] + brightness)
-end
-
--- function Map:setVisible(x, y)
---     local tile = self:getTile(x, y)
---     if not tile then return end
---     tile:setVisible(true)
---     table.insert(self.visibleTiles, tile)
--- end
 
 function Map:clearVisibility()
     for _, tile in ipairs(self.visibleTiles) do tile:setVisible(false) end
