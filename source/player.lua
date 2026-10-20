@@ -20,7 +20,7 @@ function Player:init(revolver)
     self.revolver = Revolver()
     playerImage = gfx.image.new("sprites/proto2")
     self.viewRadius = 8
-    self.speed = 3
+    self.speed = 5
     self.maxHealth = 100
     self.health = 100
 
@@ -46,8 +46,8 @@ end
 
 function Player:updateCamera(x, y)
     gfx.setDrawOffset(
-            -x + 200 / ZOOM,
-            -y + 120 / ZOOM
+            -x + 200,
+            -y + 120
         )
 end
 

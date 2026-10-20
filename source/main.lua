@@ -13,7 +13,7 @@ import "ui/ui_stack"
 
 local pd <const> = playdate
 local gfx <const> = playdate.graphics
-ZOOM = 2
+ZOOM = 4
 
 TAGS = {
     Player = 1,

@@ -33,7 +33,7 @@ function Map:init()
 end
 
 function Map:createMap(levelIdentifier)
-    pd.display.setScale(ZOOM)
+    pd.display.setScale(1)
     levelIdentifier = levelIdentifier or LDtkConfig.defaultLevel
     if self.mapLoaded and self.levelIdentifier == levelIdentifier then
         self:reloadMap()
