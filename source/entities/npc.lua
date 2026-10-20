@@ -22,5 +22,4 @@ end
 
 function NPC:interact()
     local chatBox = NpcChatBox("Hello, traveler! Welcome to our village.")
-    
 end

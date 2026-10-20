@@ -8,10 +8,9 @@ import "Corelibs/crank"
 import "map"
 import "shadowcasting"
 import "enemies/enemy_factory"
+import "ui/ui_stack"
 
 class('World').extends()
-
-currentUI = nil
 
 function World:init()
     GLOBAL_MAP = Map()
@@ -25,8 +24,8 @@ end
 function World:update()
     gfx.sprite.update()
     
-    if currentUI ~= nil then
-        currentUI:update()
+    if GLOBAL_UISTACK:hasElements() then
+        GLOBAL_UISTACK:update()
     else
         player:update()
     end

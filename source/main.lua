@@ -8,6 +8,7 @@ import "contexts/world"
 import "contexts/reload"
 import "contexts/door"
 import "contexts/battle"
+import "ui/ui_stack"
 
 
 local pd <const> = playdate
@@ -41,6 +42,7 @@ local contexts = {
 
 currentContext = contexts['World']
 currentContext:setup()
+GLOBAL_UISTACK = UIStack()
 
 function playdate.update()
     currentContext:update()
