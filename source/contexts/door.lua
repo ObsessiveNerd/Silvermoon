@@ -8,8 +8,8 @@ local gfx = playdate.graphics
 class('Door').extends()
 
 function Door:init()
-    self.x = 200 --not sure why I have to use these values
-    self.y = 120
+    self.x = 400 --not sure why I have to use these values
+    self.y = 80
 
     self.image = gfx.image.new("sprites/temp-door")
     self.sprite = gfx.sprite.new(self.image)
@@ -18,14 +18,20 @@ function Door:init()
     self.crankSpeed = 0.5
 end
 
-function Door:setup()
+function Door:setup(entity)
     pd.display.setScale(1)
     gfx.setDrawOffset(0, 0)
     self.angle = 0
-    self.sprite:moveTo(self.x + (self.w/2), self.y)
     self.sprite:setCenter(1, 0.5) -- right hinge
     self.sprite:add()
     self.sprite:moveTo(self.x, self.y)
+
+    if entity then
+        self.connectedLevelId = entity.connected_level_id
+        self.connectedDoorId = entity.connected_door_id 
+        self.doorId = entity.door_id
+        self.spawnPos = entity.relative_spawn_pos
+    end
 end
 
 function Door:update()
@@ -39,6 +45,8 @@ function Door:update()
 
     if pd.buttonJustPressed(pd.kButtonB) then
         setContext('World')
+    elseif pd.buttonJustPressed(pd.kButtonUp) then
+        self:moveToNextMap()
     end
 end
 
@@ -55,6 +63,14 @@ end
 
 function Door:tearDown()
     self.sprite:remove()
+end
+
+function Door:isOpen()
+    return self.angle >= 85
+end
+
+function Door:moveToNextMap()
+
 end
 
 --Amusing

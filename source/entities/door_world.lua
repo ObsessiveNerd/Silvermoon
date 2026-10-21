@@ -11,12 +11,15 @@ local gfx <const> = playdate.graphics
 class('DoorWorld').extends(gfx.sprite)
 
 function DoorWorld:init(entity)
+    self.entity = entity
+
     self.locked = true;
     self.isOpen = false;
 
     self:setTag(TAGS.Door)
     self:setImage(GLOBAL_MAP:getEntityImage(entity))
     local px, py = GLOBAL_MAP:tileToWorld(entity.gridX, entity.gridY)
+
     self:setCollideRect(0, 0, entity.width * ZOOM, entity.height * ZOOM)
     self:setCenter(0, 0)
     self:moveTo(px, py)
@@ -35,9 +38,9 @@ function DoorWorld:tryOpen()
         NpcChatBox("You unlocked the door with a key!", 
             function() 
                 self:remove()
-                setContext("Door") end)
+                setContext("Door", self.entity) end)
     else
         self:remove()
-        setContext("Door")
+        setContext("Door", self.entity)
     end
 end

@@ -49,13 +49,18 @@ function playdate.update()
     pd.timer.updateTimers()
 end
 
-function setContext(newContext)
+function setContext(newContext, ...)
+    local args = {...}
     print("Switching context to " .. newContext)
     local context = contexts[newContext]
     if context then
         currentContext:tearDown()
         gfx.clear()
         currentContext = context
-        currentContext:setup()
+        if #args > 0 then
+            currentContext:setup(args[1])
+        else
+            currentContext:setup()
+        end
     end
 end
