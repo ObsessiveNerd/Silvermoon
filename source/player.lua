@@ -91,16 +91,12 @@ function Player:update()
         local actualX, actualY, collisions, numberOfCollisions = self.playerSprite:moveWithCollisions(goalX, goalY)
         for i = 1, numberOfCollisions do
             if collisions[i].other:getTag() == TAGS.Key then
-                print("you got a key!")
+                NpcChatBox("You picked up a key!")
                 self.inventory.key = self.inventory.key + 1
                 GLOBAL_MAP:removeEntity(collisions[i].other)
             elseif collisions[i].other:getTag() == TAGS.Door then
-                if self.inventory.key == 0 then
-                    print("You need a key")
-                else
-                    self.inventory.key = self.inventory.key - 1
-                    setContext("Door")
-                end
+                local door = collisions[i].other
+                door:tryOpen()
             end
         end
 

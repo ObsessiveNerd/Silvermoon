@@ -284,6 +284,7 @@ function Map:reloadMap()
     for x = 1, self.width do for y = 1, self.height do self.map[x][y]:add() end end
     for _, sprite in pairs(self.collisionSprites) do sprite:add() end
     for _, entity in ipairs(self.entities) do if entity.add then entity:add() end end
+    self.fogOfWar:add()
 end
 
 function Map:clearMap()
@@ -291,6 +292,7 @@ function Map:clearMap()
     for _, sprite in pairs(self.collisionSprites) do sprite:remove() end
     for _, entity in ipairs(self.entities) do if entity.remove then entity:remove() end end
     for _, enemy in ipairs(enemiesList) do enemy:remove() end
+    self.fogOfWar:remove()
 end
 
 function Map:destroyMap()

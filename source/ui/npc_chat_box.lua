@@ -7,6 +7,12 @@ local gfx <const> = playdate.graphics
 
 class('NpcChatBox').extends(gfx.sprite)
 
+local callbacks = {}
+function NpcChatBox:init(text, callback)
+    self:init(text)
+    table.insert(callbacks, callback)
+end
+
 function NpcChatBox:init(text)
     self.background = gfx.image.new("sprites/text-box")
     self.w, self.h = self.background:getSize()
@@ -35,6 +41,12 @@ end
 function NpcChatBox:handleInput()
     if pd.buttonJustPressed(pd.kButtonA) then
         GLOBAL_UISTACK:pop() -- Remove the chat box from the UI stack
+        for _, callback in ipairs(callbacks) do
+            if callback then
+                callback()
+            end
+        end
+        callbacks = {} -- Clear callbacks after execution
         return true
     end
 end

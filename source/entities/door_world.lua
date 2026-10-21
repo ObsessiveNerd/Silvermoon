@@ -3,6 +3,7 @@ import "CoreLibs/graphics"
 import "CoreLibs/sprites"
 
 import "map"
+import "ui/npc_chat_box"
 
 local pd <const> = playdate
 local gfx <const> = playdate.graphics
@@ -24,21 +25,19 @@ function DoorWorld:init(entity)
     self:add()
 end
 
-function DoorWorld:tryUnlock()
-    if player.inventory.key > 0 then
+function DoorWorld:tryOpen()
+    if self.locked and player.inventory.key == 0 then
+        NpcChatBox("Door is locked!")
+        return
+    elseif self.locked and player.inventory.key > 0 then
         player.inventory.key -= 1
         self.locked = false
-        print("Door unlocked!")
+        NpcChatBox("You unlocked the door with a key!", 
+            function() 
+                self:remove()
+                setContext("Door") end)
     else
-        print("You need a key to unlock this door.")
+        self:remove()
+        setContext("Door")
     end
-end
-
-function DoorWorld:open()
-    if self.locked then
-        print("Door is locked!")
-        return
-    end
-    GLOBAL_MAP:removeEntity(self)
-    self:remove()
 end

@@ -21,5 +21,5 @@ function NPC:init(entity, sprite)
 end
 
 function NPC:interact()
-    local chatBox = NpcChatBox("Hello, traveler! Welcome to our village.")
+    local chatBox = NpcChatBox("Now.. where did I put that key?")
 end

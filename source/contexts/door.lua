@@ -8,8 +8,8 @@ local gfx = playdate.graphics
 class('Door').extends()
 
 function Door:init()
-    self.x = 325 --not sure why I have to use these values
-    self.y = 180
+    self.x = 200 --not sure why I have to use these values
+    self.y = 120
 
     self.image = gfx.image.new("sprites/temp-door")
     self.sprite = gfx.sprite.new(self.image)
@@ -20,10 +20,12 @@ end
 
 function Door:setup()
     pd.display.setScale(1)
+    gfx.setDrawOffset(0, 0)
     self.angle = 0
     self.sprite:moveTo(self.x + (self.w/2), self.y)
     self.sprite:setCenter(1, 0.5) -- right hinge
     self.sprite:add()
+    self.sprite:moveTo(self.x, self.y)
 end
 
 function Door:update()
@@ -33,6 +35,7 @@ function Door:update()
     self.angle = math.max(0, math.min(90, self.angle))
 
     self:render()
+    gfx.sprite.update()
 
     if pd.buttonJustPressed(pd.kButtonB) then
         setContext('World')
