@@ -51,6 +51,14 @@ function Player:updateCamera(x, y)
         )
 end
 
+function Player:setPosition(tileX, tileY)
+    print("setting player pos to " .. tileX .. "," .. tileY)
+    self:remove()
+    self.tileX = tileX
+    self.tileY = tileY
+    self:add()
+end
+
 function Player:getPosition()
     return self.playerSprite:getPosition()
 end

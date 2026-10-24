@@ -12,7 +12,8 @@ class('DoorWorld').extends(gfx.sprite)
 
 function DoorWorld:init(entity)
     self.entity = entity
-
+    self.doorId = entity.fields.door_id
+    print("doorid: " .. entity.fields.door_id)
     self.locked = true;
     self.isOpen = false;
 
@@ -43,4 +44,8 @@ function DoorWorld:tryOpen()
         self:remove()
         setContext("Door", self.entity)
     end
+end
+
+function DoorWorld:getSpawnPosition()
+    return self.entity.fields.relative_spawn_point
 end

@@ -2,6 +2,9 @@ import "CoreLibs/object"
 import "CoreLibs/graphics"
 import "CoreLibs/sprites"
 
+import "map"
+import "player"
+
 local pd = playdate
 local gfx = playdate.graphics
 
@@ -27,10 +30,12 @@ function Door:setup(entity)
     self.sprite:moveTo(self.x, self.y)
 
     if entity then
-        self.connectedLevelId = entity.connected_level_id
-        self.connectedDoorId = entity.connected_door_id 
-        self.doorId = entity.door_id
-        self.spawnPos = entity.relative_spawn_pos
+        local fields = entity.fields
+
+        self.connectedLevelId = fields.connected_level_id
+        self.connectedDoorId = fields.connected_door_id
+        self.doorId = fields.door_id
+        self.spawnPos = fields.relative_spawn_point
     end
 end
 
@@ -70,35 +75,10 @@ function Door:isOpen()
 end
 
 function Door:moveToNextMap()
-
+    print("connected level id: " .. self.connectedLevelId)
+    setContext("World", self.connectedLevelId)
+    local door = GLOBAL_MAP:getDoorById(self.connectedDoorId)
+    local point = door:getSpawnPosition()
+    player:setPosition(point.cx + 1, point.cy + 1)
+    setContext("World", self.connectedLevelId)
 end
-
---Amusing
--- function Door:render()
-
---     local angle = math.rad(self.angle)
-
---     local sx = math.max(0.05, math.cos(angle))
---     local open = math.sin(angle)
-
---     local img = gfx.image.new(self.w, self.h)
-
---     gfx.pushContext(img)
-
---         -- draw scaled base
---         self.image:drawScaled(0, 0, sx, 1)
-
---         -- fake perspective: dark + slight offset overlay
---         gfx.setColor(gfx.kColorBlack)
---         gfx.setDitherPattern(0.3, gfx.image.kDitherTypeBayer2x2)
-
---         local shadowWidth = (1 - sx) * self.w
-
---         gfx.fillRect(0, 0, shadowWidth, self.h)
-
---     gfx.popContext()
-
---     self:setImage(img)
---     self:setCenter(1, 0.5)
---     self:moveTo(self.x, self.y)
--- end

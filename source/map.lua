@@ -28,6 +28,7 @@ function Map:init()
     self.mapLoaded = false
     self.levelIdentifier = nil
     self.interactableMap = {}
+    self.doors = {}
     self.registry = EntityRegistry()
     self:registerEntityFactories()
 end
@@ -113,6 +114,13 @@ function Map:getTileImageAt(x, y)
         end
     end
     return self.tileTable:getImage(id == 0 and 1 or id)
+end
+
+function Map:getDoorById(doorId)
+    for _, entity in ipairs(self.doors) do
+        if entity.doorId == doorId then return entity end
+    end
+    return nil
 end
 
 function Map:buildCollision()
@@ -233,6 +241,7 @@ function Map:registerEntityFactories()
     end)
     self.registry:register("Door", function(map, entity)
         local door = DoorWorld(entity)
+        table.insert(map.doors, door) -- as of right now, we can't remove doors, so adding here and never removing is fine
         return door
     end)
     self.registry:register("Light", function(_, entity)
@@ -298,6 +307,7 @@ end
 function Map:destroyMap()
     self:clearMap()
     self.map, self.entities, self.collisionSprites = {}, {}, {}
+    self.doors = {}
     self.mapLoaded = false
 end
 

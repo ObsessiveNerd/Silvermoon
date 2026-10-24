@@ -21,6 +21,11 @@ function World:setup()
     player:add()
 end
 
+function World:setup(levelId)
+    GLOBAL_MAP:createMap(levelId)
+    player:add()
+end
+
 function World:update()
     gfx.sprite.update()
     
