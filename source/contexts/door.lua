@@ -12,7 +12,7 @@ class('Door').extends()
 
 function Door:init()
     self.x = 400 --not sure why I have to use these values
-    self.y = 80
+    self.y = 120
 
     self.image = gfx.image.new("sprites/temp-door")
     self.sprite = gfx.sprite.new(self.image)
@@ -22,11 +22,14 @@ function Door:init()
 end
 
 function Door:setup(entity)
+    print("DOOR SETUP")
     pd.display.setScale(1)
+    self.sprite:setImage(self.image)
     gfx.setDrawOffset(0, 0)
     self.angle = 0
     self.sprite:setCenter(1, 0.5) -- right hinge
     self.sprite:add()
+    print("door coords: " .. self.x .. "," ..self.y)
     self.sprite:moveTo(self.x, self.y)
 
     if entity then
@@ -50,7 +53,10 @@ function Door:update()
 
     if pd.buttonJustPressed(pd.kButtonB) then
         setContext('World')
-    elseif pd.buttonJustPressed(pd.kButtonUp) then
+    elseif pd.buttonJustPressed(pd.kButtonUp) or
+            pd.buttonJustPressed(pd.kButtonDown) or
+            pd.buttonJustPressed(pd.kButtonLeft) or
+            pd.buttonJustPressed(pd.kButtonRight) then
         self:moveToNextMap()
     end
 end
@@ -78,7 +84,7 @@ function Door:moveToNextMap()
     print("connected level id: " .. self.connectedLevelId)
     setContext("World", self.connectedLevelId)
     local door = GLOBAL_MAP:getDoorById(self.connectedDoorId)
+    door.locked = false
     local point = door:getSpawnPosition()
     player:setPosition(point.cx + 1, point.cy + 1)
-    setContext("World", self.connectedLevelId)
 end

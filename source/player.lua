@@ -30,6 +30,8 @@ function Player:init(revolver)
     self.playerSprite:setZIndex(1000)
     self.playerSprite:setScale(ZOOM)
 
+    self.pauseMovementUntilNextInput = false
+
     local collisionPadding = 2
     self.playerSprite:setCollideRect(collisionPadding, collisionPadding, (TILE_SIZE * ZOOM) - collisionPadding * 2, (TILE_SIZE * ZOOM) - collisionPadding * 2) 
 
@@ -71,6 +73,16 @@ function Player:update()
     local needsUpdate = false
     local moveX = 0
     local moveY = 0
+
+    if self.pauseMovementUntilNextInput then
+        if pd.buttonJustReleased(pd.kButtonUp) or
+            pd.buttonJustReleased(pd.kButtonDown) or 
+            pd.buttonJustReleased(pd.kButtonLeft) or
+            pd.buttonJustReleased(pd.kButtonRight) then
+                self.pauseMovementUntilNextInput = false
+            end
+        return
+    end
     
     if pd.buttonIsPressed(pd.kButtonUp) then
         moveY = -1
@@ -105,6 +117,8 @@ function Player:update()
             elseif collisions[i].other:getTag() == TAGS.Door then
                 local door = collisions[i].other
                 door:tryOpen()
+                self.pauseMovementUntilNextInput = true
+                return
             end
         end
 
