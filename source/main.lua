@@ -8,6 +8,7 @@ import "contexts/world"
 import "contexts/reload"
 import "contexts/door"
 import "contexts/battle"
+import "contexts/menu"
 import "ui/ui_stack"
 
 
@@ -37,7 +38,8 @@ local contexts = {
     ['World'] = World(),
     ['Reload'] = Reload(),
     ['Door'] = Door(),
-    ['Battle'] = Battle()
+    ['Battle'] = Battle(),
+    ['Menu'] = Menu(),
 }
 
 currentContext = contexts['World']
@@ -63,4 +65,17 @@ function setContext(newContext, ...)
             currentContext:setup()
         end
     end
+end
+
+storedContext = nil
+function pd.gameWillPause()
+    storedContext = currentContext
+    setContext('Menu')
+end
+
+function pd.gameWillResume()
+    currentContext:tearDown();
+    currentContext = storedContext
+    currentContext:setup()
+    storedContext = nil
 end

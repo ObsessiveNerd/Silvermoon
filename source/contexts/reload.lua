@@ -19,64 +19,64 @@ end
 function Reload:setup()
     pd.display.setScale(1)
     gfx.setDrawOffset(0, 0)
-    self.image = gfx.image.new("sprites/revolver_reload")
+    self.image = gfx.image.new("sprites/test-combat")
     self.revolverSprite = gfx.sprite.new(self.image)
     self.revolverSprite:moveTo(200, 120)
     self.revolverSprite:add()
-    self:redrawBullets()
 end
 
 function Reload:setupScaled(scale, x, y)
+    pd.display.setScale(1)
     gfx.setDrawOffset(0, 0)
-    self.image = gfx.image.new("sprites/revolver_reload")
+    self.image = gfx.image.new("sprites/test-combat")
     self.revolverSprite = gfx.sprite.new(self.image)
     self.revolverSprite:moveTo(x, y)
     self.revolverSprite:setScale(scale)
     self.revolverSprite:add()
-    self:redrawBullets()
 end
 
 function Reload:redrawBullets()
-    self.image = gfx.image.new("sprites/revolver_reload")
-    self.revolverSprite:setImage(self.image)
-    self.revolverSprite:setZIndex(1000)
-    local bullets = player:getRevolver():getBullets()
+    -- self.image = gfx.image.new("sprites/revolver_reload")
+    -- self.revolverSprite:setImage(self.image)
+    -- self.revolverSprite:setZIndex(1000)
+    -- local bullets = player:getRevolver():getBullets()
 
-    for i = 1, #bullets do
-        local bullet = bullets[i]
-        if bullet.loaded and not bullet.emptyCasing then
-            self:addBullet(i)
-        elseif bullet.loaded and bullet.emptyCasing then
-            self:spentBullet(i)
-        end
-    end
+    -- for i = 1, #bullets do
+    --     local bullet = bullets[i]
+    --     if bullet.loaded and not bullet.emptyCasing then
+    --         self:addBullet(i)
+    --     elseif bullet.loaded and bullet.emptyCasing then
+    --         self:spentBullet(i)
+    --     end
+    -- end
     -- pd.display.flush() --temp fix for the reolver. Unsure why the "spent" bullets will sometimes all disappear
 end
 
 function Reload:update()
-    angle += pd.getCrankTicks(360)
-    if(angle < 0) then
-        angle = 359.9
-    end
-    if angle >= 360 then
-        angle = 0
-    end
+    gfx.sprite.update()
+    -- angle += pd.getCrankTicks(360)
+    -- if(angle < 0) then
+    --     angle = 359.9
+    -- end
+    -- if angle >= 360 then
+    --     angle = 0
+    -- end
 
-    self.revolverSprite:setRotation(angle)
+    -- self.revolverSprite:setRotation(angle)
 
-    if pd.buttonJustPressed(pd.kButtonB) and not self.ignoreClose then
-        setContext('World')
-    end
+    -- if pd.buttonJustPressed(pd.kButtonB) and not self.ignoreClose then
+    --     setContext('World')
+    -- end
 
-    if pd.buttonJustPressed(pd.kButtonA) then
-        self:loadBullet()
-    end
+    -- if pd.buttonJustPressed(pd.kButtonA) then
+    --     self:loadBullet()
+    -- end
 
-    if pd.buttonJustPressed(pd.kButtonDown) then
-        local slot = self:getSlotFromAngle()
-        player:getRevolver():ejectBullet(slot)
-        self:redrawBullets()
-    end
+    -- if pd.buttonJustPressed(pd.kButtonDown) then
+    --     local slot = self:getSlotFromAngle()
+    --     player:getRevolver():ejectBullet(slot)
+    --     self:redrawBullets()
+    -- end
 end
 
 function Reload:ignoreCloseButton()

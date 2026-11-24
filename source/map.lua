@@ -71,11 +71,20 @@ function Map:loadLDtk(levelIdentifier)
     self.tileTable = gfx.imagetable.new("spritemap/invert-test-map-table-8-8")
 
     self.layers = {}
+    self.layerImageTables = {}
     for _, layerName in ipairs(LDtkConfig.visualLayers) do
         -- A missing optional visual layer is harmless, but is reported clearly.
         local layer = self.world:getLayer(self.level, layerName)
         if layer then
             self.layers[layerName] = LDtk.create_tilemap(levelIdentifier, layerName)
+            local tiles = #layer.autoLayerTiles > 0 and layer.autoLayerTiles or layer.gridTiles
+            local flipped = false
+            for _, tile in ipairs(tiles) do
+                if tile.f ~= 0 then flipped = true; break end
+            end
+            local path = layer.__tilesetRelPath:gsub("^%.%./", "")
+            if flipped then path = path:gsub("([^/]+)$", "flipped-%1") end
+            self.layerImageTables[layerName] = assert(gfx.imagetable.new(path), "Could not load tileset: " .. path)
         else
             print("LDtk: visual layer not found: " .. layerName)
         end
@@ -105,15 +114,17 @@ end
 
 function Map:getTileImageAt(x, y)
     -- Later layers visually override earlier layers, matching the old renderer.
-    local id = 0
+    local image = nil
     for _, layerName in ipairs(LDtkConfig.visualLayers) do
         local layer = self.layers[layerName]
         if layer then
             local candidate = layer:getTileAtPosition(x, y)
-            if candidate and candidate ~= 0 then id = candidate end
+            if candidate and candidate ~= 0 then
+                image = self.layerImageTables[layerName]:getImage(candidate)
+            end
         end
     end
-    return self.tileTable:getImage(id == 0 and 1 or id)
+    return image or self.tileTable:getImage(1)
 end
 
 function Map:getDoorById(doorId)
