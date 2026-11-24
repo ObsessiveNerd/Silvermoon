@@ -17,7 +17,7 @@ local BAYER_4X4 = {
 function FogOfWar:init(map)
     self.map = map
     self.light = {}
-    self:setCenter(0.5, 0.5)
+    self:setCenter(0, 0)
     self:moveTo(0, 0)
     self:setSize(MAP_WIDTH * TILE_SIZE * ZOOM, MAP_HEIGHT * TILE_SIZE * ZOOM)
     self:setZIndex(1000)
@@ -31,19 +31,14 @@ function FogOfWar:init(map)
     end
 end
 
-function FogOfWar:update()
-    local playerX, playerY = player:getPosition()
-    self:moveTo(playerX, playerY)
-end
-
 function FogOfWar:draw(x, y, width, height)
     local cellSize = (TILE_SIZE / 2) * ZOOM
 
     for lightX = 1, LIGHTING_WIDTH do
         for lightY = 1, LIGHTING_HEIGHT do
             local darkness = 3 - self.light[lightX][lightY]
-            local drawX = x + (lightX - 1) * cellSize
-            local drawY = y + (lightY - 1) * cellSize
+            local drawX = (lightX - 1) * cellSize
+            local drawY = (lightY - 1) * cellSize
 
             self:drawDitheredDarkness(drawX, drawY, cellSize, darkness)
         end
@@ -56,6 +51,7 @@ function FogOfWar:clearMapLighting()
             self.light[x][y] = 0
         end
     end
+    self:markDirty()
 end
 
 function FogOfWar:addLight(lightX, lightY, brightness)
@@ -73,18 +69,18 @@ function FogOfWar:drawDitheredDarkness(x, y, size, darkness)
         return
     end
 
-    -- draw the specific dither pattern for the darkness level
-    local threshold = 12 + self:getTwinkleOffset(x, y)
+    -- -- draw the specific dither pattern for the darkness level
+    -- local threshold = 12 + self:getTwinkleOffset(x, y)
 
-    for pixelY = 0, size - 1 do
-        for pixelX = 0, size - 1 do
-            local bayerX = (pixelX % 4) + 1
-            local bayerY = (pixelY % 4) + 1
-            if BAYER_4X4[bayerY][bayerX] < threshold then
-                gfx.fillRect(x + pixelX, y + pixelY, 1, 1)
-            end
-        end
-    end
+    -- for pixelY = 0, size - 1 do
+    --     for pixelX = 0, size - 1 do
+    --         local bayerX = (pixelX % 4) + 1
+    --         local bayerY = (pixelY % 4) + 1
+    --         if BAYER_4X4[bayerY][bayerX] < threshold then
+    --             gfx.fillRect(x + pixelX, y + pixelY, 1, 1)
+    --         end
+    --     end
+    -- end
 end
 
 function FogOfWar:getTwinkleOffset(x, y)

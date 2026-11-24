@@ -16,8 +16,9 @@ local multipliers = {
 }
 
 function computeFOV(px, py, radius)
-    local lightX = px * 2
-    local lightY = py * 2
+    local cellSize = (TILE_SIZE / 2) * ZOOM
+    local lightX = math.floor(px / cellSize) + 1
+    local lightY = math.floor(py / cellSize) + 1
 
     GLOBAL_MAP:clearMapLighting()
     GLOBAL_MAP:addLight(lightX, lightY, 3)

@@ -11,7 +11,7 @@ local gfx = playdate.graphics
 class('Door').extends()
 
 function Door:init()
-    self.x = 400 --not sure why I have to use these values
+    self.x = 200 --not sure why I have to use these values
     self.y = 120
 
     self.image = gfx.image.new("sprites/temp-door")

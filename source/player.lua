@@ -43,14 +43,15 @@ function Player:add()
     local halfTileSize = (TILE_SIZE * ZOOM) / 2
     self.playerSprite:moveTo(posX + halfTileSize, posY + halfTileSize)
     self:updateCamera(posX + halfTileSize, posY + halfTileSize)
-    computeFOV(self.tileX, self.tileY, self.viewRadius)
+    local x, y = self.playerSprite:getPosition()
+    computeFOV(x, y, self.viewRadius)
 end
 
 function Player:updateCamera(x, y)
-    gfx.setDrawOffset(
-            -x + 200,
-            -y + 120
-        )
+    -- gfx.setDrawOffset(
+    --         -x + 200,
+    --         -y + 120
+    --     )
 end
 
 function Player:setPosition(tileX, tileY)
@@ -126,9 +127,13 @@ function Player:update()
         if tx ~= self.tileX or ty ~= self.tileY then
             self.tileX = tx
             self.tileY = ty
-            computeFOV(self.tileX, self.tileY, self.viewRadius)
         end
-        self:updateCamera(actualX, actualY)
+        local cellSize = (TILE_SIZE / 2) * ZOOM
+        if math.floor(x / cellSize) ~= math.floor(actualX / cellSize) or
+            math.floor(y / cellSize) ~= math.floor(actualY / cellSize) then
+            computeFOV(actualX, actualY, self.viewRadius)
+        end
+        -- self:updateCamera(actualX, actualY)
     end
 
     if pd.buttonJustPressed(pd.kButtonA) then

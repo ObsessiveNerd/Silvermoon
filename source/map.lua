@@ -190,7 +190,7 @@ function Map:setCollisionValue(x, y, value)
         self:createCollisionSprite(x, y)
     end
     if player then
-        local px, py = player:getMapTilePos()
+        local px, py = player:getPosition()
         computeFOV(px, py, player.viewRadius)
     end
     return true
